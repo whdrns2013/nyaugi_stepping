@@ -26,7 +26,7 @@ def _build_html_running(start_time_ts):
     overflow: hidden;
   }}
   .display {{
-    font-size: 72px;
+    font-size: 40px;
     font-family: 'Consolas', 'Courier New', monospace;
     font-weight: bold;
     color: #2ecc71;
@@ -34,7 +34,7 @@ def _build_html_running(start_time_ts):
     padding: 20px 40px;
     border-radius: 12px;
     letter-spacing: 2px;
-    min-width: 420px;
+    width: 100%;
     text-align: center;
     box-shadow: 0 4px 15px rgba(0,0,0,0.3);
   }}
@@ -82,7 +82,7 @@ def _build_html_static(formatted_time, color="#ffffff"):
     overflow: hidden;
   }}
   .display {{
-    font-size: 72px;
+    font-size: 40px;
     font-family: 'Consolas', 'Courier New', monospace;
     font-weight: bold;
     color: {color};
@@ -90,7 +90,7 @@ def _build_html_static(formatted_time, color="#ffffff"):
     padding: 20px 40px;
     border-radius: 12px;
     letter-spacing: 2px;
-    min-width: 420px;
+    width: 100%;
     text-align: center;
     box-shadow: 0 4px 15px rgba(0,0,0,0.3);
   }}
