@@ -26,15 +26,16 @@ def _build_html_running(start_time_ts):
     overflow: hidden;
   }}
   .display {{
-    font-size: 72px;
+    font-size: 55px;
     font-family: 'Consolas', 'Courier New', monospace;
     font-weight: bold;
     color: #2ecc71;
     background-color: #1a1a2e;
-    padding: 20px 40px;
+    padding: 20px;
     border-radius: 12px;
     letter-spacing: 2px;
-    min-width: 420px;
+    width: 100%;
+    box-sizing: border-box;
     text-align: center;
     box-shadow: 0 4px 15px rgba(0,0,0,0.3);
   }}
@@ -82,15 +83,16 @@ def _build_html_static(formatted_time, color="#ffffff"):
     overflow: hidden;
   }}
   .display {{
-    font-size: 72px;
+    font-size: 55px;
     font-family: 'Consolas', 'Courier New', monospace;
     font-weight: bold;
     color: {color};
     background-color: #1a1a2e;
-    padding: 20px 40px;
+    padding: 20px;
     border-radius: 12px;
     letter-spacing: 2px;
-    min-width: 420px;
+    width: 100%;
+    box-sizing: border-box;
     text-align: center;
     box-shadow: 0 4px 15px rgba(0,0,0,0.3);
   }}
