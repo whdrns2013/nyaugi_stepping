@@ -26,7 +26,7 @@ def _build_html_running(start_time_ts):
     overflow: hidden;
   }}
   .display {{
-    font-size: clamp(30px, 7vw, 50px);
+    font-size: clamp(10px, 4vw, 20px);
     font-family: 'Consolas', 'Courier New', monospace;
     font-weight: bold;
     color: #2ecc71;
@@ -83,7 +83,7 @@ def _build_html_static(formatted_time, color="#ffffff"):
     overflow: hidden;
   }}
   .display {{
-    font-size: clamp(30px, 7vw, 50px);
+    font-size: clamp(10px, 4vw, 20px);
     font-family: 'Consolas', 'Courier New', monospace;
     font-weight: bold;
     color: {color};
