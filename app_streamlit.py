@@ -255,15 +255,15 @@ elif menu == "이력 조회":
             if response.history_list:
                 # Sort by ID descending (latest first)
                 history_list = sorted(response.history_list, key=lambda x: x.id, reverse=True)
-                
+
                 # Pagination settings
                 items_per_page = 10
                 total_items = len(history_list)
                 total_pages = (total_items + items_per_page - 1) // items_per_page
-                
+
                 if 'page' not in st.session_state:
                     st.session_state.page = 1
-                
+
                 # Bound page state
                 if st.session_state.page > total_pages:
                     st.session_state.page = total_pages
@@ -274,89 +274,114 @@ elif menu == "이력 조회":
                 end_idx = start_idx + items_per_page
                 page_list = history_list[start_idx:end_idx]
 
-                # CSV Download Button
+                # 전체 데이터 CSV 다운로드용
                 history_data = []
                 for h in history_list:
                     history_data.append({
                         "ID": h.id,
-                        "User ID": h.user_id,
-                        "User Name": h.name,
-                        "Start Time": h.start_datetime,
-                        "End Time": h.end_datetime,
-                        "Duration": h.duration,
-                        "Level": h.level,
-                        "Rest Count": h.rest_count,
-                        "Heartbeat": h.heartbeat
+                        "사용자 ID": h.user_id,
+                        "사용자 이름": h.name,
+                        "시작 시간": h.start_datetime,
+                        "종료 시간": h.end_datetime,
+                        "소요(초)": h.duration,
+                        "층수": h.level,
+                        "휴식": f"{h.rest_count}회",
+                        "심박수": h.heartbeat
                     })
+
                 df_download = pd.DataFrame(history_data)
                 csv = df_download.to_csv(index=False).encode('utf-8-sig')
-                
+
                 st.download_button(
                     label="CSV 다운로드",
                     data=csv,
                     file_name=f"climbing_history_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv",
                     mime="text/csv"
                 )
-                st.markdown("---")
-                cols = st.columns([1, 1, 1, 2, 2, 1, 1, 1, 1, 1])
-                cols[0].write("**ID**")
-                cols[1].write("**사용자 ID**")
-                cols[2].write("**사용자 이름**")
-                cols[3].write("**시작 시간**")
-                cols[4].write("**종료 시간**")
-                cols[5].write("**소요(초)**")
-                cols[6].write("**층수**")
-                cols[7].write("**휴식**")
-                cols[8].write("**심박수**")
-                cols[9].write("**삭제**")
+
                 st.markdown("---")
 
+                # 현재 페이지 표시용 DataFrame
+                page_data = []
                 for h in page_list:
-                    with st.container():
-                        cols = st.columns([1, 1, 1, 2, 2, 1, 1, 1, 1, 1])
-                        cols[0].write(h.id)
-                        cols[1].write(h.user_id)
-                        cols[2].write(h.name)
-                        cols[3].write(h.start_datetime)
-                        cols[4].write(h.end_datetime)
-                        cols[5].write(h.duration)
-                        cols[6].write(h.level)
-                        cols[7].write(f"{h.rest_count}회")
-                        cols[8].write(h.heartbeat)
-                        if cols[9].button("Delete", key=f"del_{h.id}"):
-                            try:
-                                body = DeleteStepHistoryRequestBody(id=h.id)
-                                del_response = delete_step_history(body)
-                                if del_response.status_code == StatusCode.SUCCESS.value:
-                                    st.success(f"ID {h.id} 기록이 삭제되었습니다.")
-                                    st.rerun()
-                                else:
-                                    st.error(f"삭제 실패: {del_response.message}")
-                            except Exception as e:
-                                st.error(f"오류 발생: {e}")
+                    page_data.append({
+                        "ID": h.id,
+                        "사용자 ID": h.user_id,
+                        "사용자 이름": h.name,
+                        "시작 시간": h.start_datetime[:19],
+                        "종료 시간": h.end_datetime[:19],
+                        "소요(초)": h.duration,
+                        "층수": h.level,
+                        "휴식": f"{h.rest_count}회",
+                        "심박수": h.heartbeat
+                    })
+
+                df_page = pd.DataFrame(page_data)
+
+                st.dataframe(
+                    df_page,
+                    use_container_width=True,
+                    hide_index=True
+                )
 
                 st.markdown("---")
+
+                # 삭제 기능은 표 아래에 별도 선택 방식으로 제공
+                delete_options = {
+                    f"ID {h.id} - {h.name} / {h.start_datetime}": h.id
+                    for h in page_list
+                }
+
+                selected_delete = st.selectbox(
+                    "삭제할 기록 선택",
+                    options=list(delete_options.keys()),
+                    index=None,
+                    placeholder="삭제할 기록을 선택하세요"
+                )
+
+                if selected_delete is not None:
+                    selected_id = delete_options[selected_delete]
+
+                    if st.button("선택한 기록 삭제", type="primary"):
+                        try:
+                            body = DeleteStepHistoryRequestBody(id=selected_id)
+                            del_response = delete_step_history(body)
+
+                            if del_response.status_code == StatusCode.SUCCESS.value:
+                                st.success(f"ID {selected_id} 기록이 삭제되었습니다.")
+                                st.rerun()
+                            else:
+                                st.error(f"삭제 실패: {del_response.message}")
+
+                        except Exception as e:
+                            st.error(f"오류 발생: {e}")
+
+                st.markdown("---")
+
+                # 페이지네이션
                 page_cols = st.columns(total_pages + 2 if total_pages < 10 else 12)
 
-                # Prev button
                 if st.session_state.page > 1:
                     if page_cols[0].button("Prev", key="browse_prev"):
                         st.session_state.page -= 1
                         st.rerun()
 
-                # Page numbers
                 for i in range(total_pages):
                     if i < 10:
-                        if page_cols[i+1].button(str(i+1), key=f"pg_{i+1}", type="primary" if st.session_state.page == i+1 else "secondary"):
-                            st.session_state.page = i+1
+                        if page_cols[i + 1].button(
+                            str(i + 1),
+                            key=f"pg_{i + 1}",
+                            type="primary" if st.session_state.page == i + 1 else "secondary"
+                        ):
+                            st.session_state.page = i + 1
                             st.rerun()
 
-                # Next button
                 if st.session_state.page < total_pages:
                     next_col_idx = min(total_pages + 1, 11)
                     if page_cols[next_col_idx].button("Next", key="browse_next"):
                         st.session_state.page += 1
                         st.rerun()
+
             else:
                 st.info("조회된 기록이 없습니다.")
         else:
