@@ -228,13 +228,26 @@ elif menu == "이력 조회":
     with columns[0]:
         user_id_filter = st.text_input("사용자 ID로 검색 (공백 시 전체 조회)", key="user_id_input")
     with columns[1]:
-        user_name_filter = st.text_input("사용자 이름으로 검색 (공백 시 전체 조회)", key="user_name_input")
+        try:
+            user_resp = retrieve_all_users()
+            if user_resp.status_code == StatusCode.SUCCESS.value and user_resp.user_list:
+                user_options = {f"{u.name} ({u.email})": u.id for u in user_resp.user_list}
+                user_name_filter = st.selectbox("사용자 선택", options=list(user_options.keys()), index=None)
+                if user_name_filter is not None:
+                    user_id_filter = user_options[user_name_filter]
+                else:
+                    user_id_filter = None
+            else:
+                st.warning("사용자 목록을 불러올 수 없습니다.")
+        except Exception as e:
+            st.error(f"사용자 조회 중 오류 발생: {e}")
     
     try:
         if user_id_filter:
             response = retrieve_history_by_user_id(int(user_id_filter))
         elif user_name_filter:
-            response = retrieve_history_by_user_name(str(user_name_filter))
+            # response = retrieve_history_by_user_name(str(u_ids))
+            response = retrieve_history_by_user_id(int(user_id_filter))
         else:
             response = retrieve_all_history_with_user_name()
             
