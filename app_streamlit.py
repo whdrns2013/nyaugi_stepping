@@ -9,6 +9,7 @@ from schemas.step_history import CreateStepHistoryRequestBody, DeleteStepHistory
 from schemas.users import CreateUserRequestBody
 from config.enums import StatusCode
 from components.stopwatch import render_stopwatch
+from zoneinfo import ZoneInfo
 
 st.set_page_config(page_title="Nyaugi Stepping", layout="wide")
 
@@ -40,7 +41,7 @@ if menu == "계단오르기 시작":
     with btn_col1:
         if st.button("시작 / 재시작", type="primary", use_container_width=True, key="sw_start"):
             st.session_state.stopwatch_state = "running"
-            st.session_state.stopwatch_start_ts = datetime.now()
+            st.session_state.stopwatch_start_ts = datetime.now(ZoneInfo("Asia/Seoul"))
             st.session_state.stopwatch_perf_offset = time.time()
     with btn_col2:
         if st.button("중지", use_container_width=True, key="sw_stop"):
